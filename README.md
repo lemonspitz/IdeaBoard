@@ -32,6 +32,14 @@ link or join code into **Share → Join**, or open `ideaboard://join/CODE`.
   running in the background or minimised). When it ends, everyone keeps a copy.
 - Very strict company or school networks can block peer-to-peer connections.
 
+## Accounts and cloud boards
+
+Sign up with your email and a password, confirm the email, and your boards are saved to your
+account. Open them from any Mac or browser under **My boards**, and invite people by email from
+**Share**. Everyone with access sees changes and cursors live, even when the owner is offline.
+Invited boards show up under **Shared with me**. Accounts run on Firebase; see
+[FIREBASE-SETUP.md](FIREBASE-SETUP.md) for setting up the project.
+
 ## Features
 
 - Sticky notes (text shrinks to fit), rectangles, ellipses, diamonds, text, frames, images, pen and eraser

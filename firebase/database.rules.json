@@ -1,0 +1,56 @@
+{
+  "rules": {
+    "boards": {
+      "$bid": {
+        ".read": "auth != null && auth.token.email_verified == true && (data.child('meta/owner').val() == auth.uid || data.child('members').child(auth.token.email.replace('.', ',')).exists())",
+        "meta": {
+          ".write": "auth != null && auth.token.email_verified == true && ((!data.exists() && newData.child('owner').val() == auth.uid) || data.child('owner').val() == auth.uid || (newData.exists() && root.child('boards').child($bid).child('members').child(auth.token.email.replace('.', ',')).exists()))",
+          ".validate": "!newData.exists() || (newData.hasChildren(['name', 'owner']) && (!data.exists() || newData.child('owner').val() == data.child('owner').val()))",
+          "name": {
+            ".validate": "newData.isString() && newData.val().length <= 120"
+          }
+        },
+        "members": {
+          "$ek": {
+            ".write": "auth != null && auth.token.email_verified == true && (root.child('boards').child($bid).child('meta/owner').val() == auth.uid || ($ek == auth.token.email.replace('.', ',') && !newData.exists()))",
+            ".validate": "!newData.exists() || newData.child('email').isString()"
+          }
+        },
+        "items": {
+          ".write": "auth != null && auth.token.email_verified == true && (root.child('boards').child($bid).child('meta/owner').val() == auth.uid || root.child('boards').child($bid).child('members').child(auth.token.email.replace('.', ',')).exists())",
+          "$iid": {
+            ".validate": "newData.child('j').isString() && newData.child('j').val().length < 300000 && newData.child('z').isNumber()",
+            "z": {
+              ".write": "auth != null && auth.token.email_verified == true && (root.child('boards').child($bid).child('meta/owner').val() == auth.uid || root.child('boards').child($bid).child('members').child(auth.token.email.replace('.', ',')).exists())"
+            }
+          }
+        },
+        "blobs": {
+          ".write": "auth != null && auth.token.email_verified == true && (root.child('boards').child($bid).child('meta/owner').val() == auth.uid || root.child('boards').child($bid).child('members').child(auth.token.email.replace('.', ',')).exists())",
+          "$h": {
+            ".validate": "newData.isString() && newData.val().length < 2600000"
+          }
+        },
+        "presence": {
+          "$uid": {
+            ".write": "auth != null && auth.token.email_verified == true && (($uid == auth.uid && (root.child('boards').child($bid).child('meta/owner').val() == auth.uid || root.child('boards').child($bid).child('members').child(auth.token.email.replace('.', ',')).exists())) || root.child('boards').child($bid).child('meta/owner').val() == auth.uid)"
+          }
+        }
+      }
+    },
+    "userBoards": {
+      "$uid": {
+        ".read": "auth != null && auth.uid == $uid",
+        ".write": "auth != null && auth.uid == $uid"
+      }
+    },
+    "sharedWith": {
+      "$ek": {
+        ".read": "auth != null && auth.token.email_verified == true && auth.token.email.replace('.', ',') == $ek",
+        "$bid": {
+          ".write": "auth != null && auth.token.email_verified == true && (root.child('boards').child($bid).child('meta/owner').val() == auth.uid || (auth.token.email.replace('.', ',') == $ek && !newData.exists()))"
+        }
+      }
+    }
+  }
+}

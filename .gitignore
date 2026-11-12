@@ -1,3 +1,6 @@
 build/
 .DS_Store
 dist/
+firebase/emulator-test-accounts.txt
+firebase/*.log
+firebase/.firebase/

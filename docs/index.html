@@ -143,6 +143,56 @@ svg.vec .stroke{fill:none;stroke-linecap:round;stroke-linejoin:round}
 .rcur svg{display:block;filter:drop-shadow(0 1px 1px rgba(0,0,0,.25))}
 .rcur span{position:absolute;left:14px;top:17px;color:#fff;font-size:11.5px;font-weight:600;padding:2px 8px;border-radius:10px;white-space:nowrap}
 .rsel{position:absolute;border:2px solid;border-radius:3px;opacity:.85}
+.acct{width:32px!important;min-width:32px!important;height:32px!important;padding:0!important;border-radius:50%!important;
+  background:var(--accent-soft)!important;color:var(--accent)!important;font-weight:700;font-size:12px}
+#acctmenu{right:12px;top:60px;min-width:240px;padding:6px;display:none;z-index:11}
+#acctmenu.show{display:block}
+#acctmenu .who{padding:8px 10px 6px;display:flex;flex-direction:column}
+#acctmenu .who span{color:var(--muted);font-size:12.5px}
+#acctmenu button{width:100%;justify-content:flex-start;display:flex;height:34px;padding:0 10px}
+#boards{left:50%;top:50%;transform:translate(-50%,-50%);width:min(520px,calc(100% - 24px));max-height:min(620px,calc(100% - 40px));
+  display:none;flex-direction:column;padding:16px;z-index:12}
+#boards.show{display:flex}
+#boards .bhead{display:flex;align-items:center;justify-content:space-between}
+#boards h3{margin:0;font-size:17px}
+#boards .tabs{display:flex;gap:4px;margin:12px 0 8px;border-bottom:1px solid var(--line)}
+#boards .tabs button{border-radius:8px 8px 0 0;height:34px;color:var(--muted)}
+#boards .tabs button.on{color:var(--accent);box-shadow:inset 0 -2px 0 var(--accent);background:transparent}
+#boards ul{list-style:none;margin:0;padding:0;overflow-y:auto;flex:1;min-height:120px}
+#boards li{display:flex;align-items:center;gap:8px;padding:10px;border-radius:10px;cursor:pointer}
+#boards li:hover{background:var(--hover)}
+#boards li.cur{background:var(--accent-soft)}
+#boards li>div{flex:1;min-width:0;display:flex;flex-direction:column}
+#boards li b{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#boards li span{color:var(--muted);font-size:12px}
+#boards li.empty{color:var(--muted);cursor:default;font-size:13px;line-height:1.5}
+#boards li.empty:hover{background:transparent}
+#boards li button{opacity:0;color:var(--muted)}
+#boards li:hover button{opacity:1}
+#boards .bfoot{display:flex;gap:8px;padding-top:12px;border-top:1px solid var(--line);margin-top:8px;flex-wrap:wrap}
+#boards .bfoot button:not(.primary){background:var(--hover)}
+#sharepanel li .x{margin-left:auto;min-width:24px;height:24px;padding:0;background:transparent!important;color:var(--muted)}
+#auth{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:50;padding:16px;
+  background:color-mix(in srgb,var(--bg) 70%,transparent);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+#auth.show{display:flex}
+#auth .card{position:relative;width:min(400px,100%);padding:28px 28px 22px;border-radius:16px}
+#auth .brand{display:flex;align-items:center;gap:10px;margin-bottom:18px;font-size:16px}
+#auth .mark{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,#ffd54f 0 50%,#4f5bd5 50%)}
+#auth h2{margin:0 0 6px;font-size:22px}
+#auth .sub{margin:0 0 16px;color:var(--muted);font-size:13.5px;line-height:1.5}
+#auth .center{text-align:center;margin:20px 0}
+#auth .ok{background:var(--accent-soft);color:var(--ink);padding:8px 10px;border-radius:8px;font-size:13px;margin:0 0 12px}
+#auth label{display:block;font-size:12.5px;color:var(--muted);margin:0 0 12px}
+#auth label em{font-style:normal;opacity:.8}
+#auth input{display:block;width:100%;height:40px;margin-top:5px;border:1px solid var(--line);background:var(--bg);color:var(--ink);
+  border-radius:9px;padding:0 12px;font:inherit;font-size:15px;outline:none;-webkit-user-select:text;user-select:text}
+#auth input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+#auth .err{color:#d32f2f;font-size:13px;min-height:18px;margin:-2px 0 8px}
+#auth button.wide{width:100%;height:42px;margin-top:6px;font-size:14.5px}
+#auth button:not(.primary){background:var(--hover)}
+#auth .links{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-top:16px;font-size:13px;color:var(--muted)}
+#auth a{color:var(--accent);text-decoration:none;font-weight:500}
+#auth a:hover{text-decoration:underline}
 @media (max-width:640px){
   #name{width:110px}
   #top .sep,#undobtn,#redobtn{display:none}
@@ -172,7 +222,9 @@ svg.vec .stroke{fill:none;stroke-linecap:round;stroke-linejoin:round}
     <button id="undobtn" title="Undo (⌘Z)"></button>
     <button id="redobtn" title="Redo (⇧⌘Z)"></button>
   </div>
-  <div id="topright" class="panel"><div id="people"></div><button id="sharebtn" class="primary">Share</button></div>
+  <div id="topright" class="panel"><div id="people"></div><button id="sharebtn" class="primary">Share</button><button id="acctbtn" class="acct" hidden></button></div>
+  <div id="acctmenu" class="panel"></div>
+  <div id="boards" class="panel"></div>
   <div id="sharepanel" class="panel"></div>
   <div id="menu" class="panel"></div>
   <div id="tools" class="panel"></div>
@@ -188,6 +240,7 @@ svg.vec .stroke{fill:none;stroke-linecap:round;stroke-linejoin:round}
   </div>
   <div id="toast" class="panel"></div>
 </div>
+<div id="auth"></div>
 <textarea id="clip" aria-hidden="true" tabindex="-1"></textarea>
 <input id="filein" type="file" accept=".ideaboard,.json,application/json" hidden>
 <input id="imgin" type="file" accept="image/*" multiple hidden>
@@ -207,6 +260,21 @@ const SIZES  = [10,12,14,16,18,20,24,28,32,40,48,56,64,80,96,120];
 const TEXTY  = new Set(['sticky','text','rect','ellipse','diamond','frame']);
 const SHAPES = new Set(['rect','ellipse','diamond']);
 const EXT = 'ideaboard';
+
+// ---------- Firebase settings ----------
+// Paste your Firebase web-app config here (Project settings → Your apps). It is public by design;
+// access is enforced by the database rules in firebase/database.rules.json.
+const FIREBASE_CONFIG = null;
+const FB_VER = '10.14.1';
+const EMU = /[?&]emulator=1/.test(location.search) || !!window.__IDEABOARD_EMULATOR;
+const fbConfig = EMU
+  ? { apiKey: 'demo-key', authDomain: 'demo-ideaboard.firebaseapp.com', projectId: 'demo-ideaboard', databaseURL: 'http://127.0.0.1:9000/?ns=demo-ideaboard-default-rtdb' }
+  : (window.__IDEABOARD_FIREBASE || FIREBASE_CONFIG);
+const CLOUD = !!(fbConfig && fbConfig.apiKey);
+const cloud = {
+  on: false, id: null, role: null, user: null, auth: null, db: null, listeners: [], presenceRef: null,
+  blobs: new Map(), uploaded: new Set(), z: new Map(), meta: null, members: {}, pendingBoard: null, pendingJoin: null,
+};
 
 const ICON = {
   select:'<path d="M5 3.5l10.5 6-4.6 1.4L8.6 15.5z"/>',
@@ -345,7 +413,7 @@ function applyView() {
   stage.style.backgroundSize = `${g}px ${g}px`;
   stage.style.backgroundPosition = `${view.x}px ${view.y}px`;
   $('#zoompct').textContent = Math.round(view.z * 100) + '%';
-  if (collab.on) drawCursors();
+  if (collab.on || cloud.on) drawCursors();
 }
 function zoomAt(z, sx, sy) {
   const nz = clamp(z, 0.05, 8);
@@ -463,7 +531,7 @@ function render() {
   $('#hint').style.display = items.length ? 'none' : '';
   $('#undobtn').disabled = !undoStack.length; $('#redobtn').disabled = !redoStack.length;
   applyView(); drawOverlay();
-  if (collab.on) scheduleSync();
+  if (collab.on || cloud.on) scheduleSync();
 }
 
 // ---------- overlay & context bar ----------
@@ -631,7 +699,7 @@ function redo() {
   const e = redoStack.pop(); if (!e) return;
   applyVals(e.after, e.ao); undoStack.push(e); changed();
 }
-function setDirty(v) { if (dirty !== v) { dirty = v; post({ cmd: 'dirty', value: v }); } }
+function setDirty(v) { if (cloud.on) v = false; if (dirty !== v) { dirty = v; post({ cmd: 'dirty', value: v }); } }
 let saveTimer = 0;
 function changed() {
   commitUndo(); render(); setDirty(true);
@@ -651,6 +719,7 @@ function load(json, name) {
   try { d = typeof json === 'string' ? JSON.parse(json) : json; } catch (e) { toast('That file could not be read'); return false; }
   if (!d || !Array.isArray(d.items)) { toast('That is not an Idea Board file'); return false; }
   if (collab.on || collab.connecting) leaveSession(true);
+  if (cloud.on) { closeCloud(); ls.set('ideaboard.lastCloud', ''); }
   endEdit();
   items = d.items.filter(i => i && i.id && i.type);
   boardName = name || d.name || 'Untitled board'; $('#name').value = boardName;
@@ -664,6 +733,7 @@ function load(json, name) {
 }
 function newBoard() {
   if (collab.on || collab.connecting) leaveSession(true);
+  if (cloud.on) { closeCloud(); ls.set('ideaboard.lastCloud', ''); }
   endEdit();
   items = []; sel.clear(); undoStack = []; redoStack = []; pendingBase = null; boardName = 'Untitled board'; $('#name').value = boardName;
   view = { x: innerWidth / 2, y: innerHeight / 2, z: 1 };
@@ -736,7 +806,7 @@ function startEdit(id) {
     if (it.type === 'text') { it.h = el.offsetHeight; }
     if (it.type === 'sticky' || SHAPES.has(it.type)) fitText(it, el);
     drawOverlay();
-    if (collab.on) scheduleSync();
+    if (collab.on || cloud.on) scheduleSync();
   };
   txt.onblur = () => endEdit();
   drawOverlay();
@@ -889,7 +959,7 @@ function eraseAt(e) {
 }
 addEventListener('pointermove', e => {
   lastMouse = { x: e.clientX, y: e.clientY };
-  if (collab.on) sendCursor(e);
+  if (cloud.on) cloudCursor(e); else if (collab.on) sendCursor(e);
   if (drag && drag.it && !byId.has(drag.it.id)) drag = null; // removed by someone else mid-gesture
   if (!drag) {
     if (tool === 'connector') { const a = anchorAt(e.clientX, e.clientY); const id = a ? a.id : null; if (id !== hoverId) { hoverId = id; drawOverlay(); } }
@@ -1042,6 +1112,7 @@ document.addEventListener('keydown', e => {
     if (e.key === 'Escape' || (e.key === 'Enter' && (e.metaKey || e.ctrlKey))) { e.preventDefault(); endEdit(); refocus(); }
     return;
   }
+  if (authShown()) return;
   if (isField(e.target)) { if (e.key === 'Enter' || e.key === 'Escape') e.target.blur(); return; }
   const mod = e.metaKey || e.ctrlKey, k = e.key.toLowerCase();
   if (mod) {
@@ -1347,6 +1418,7 @@ const TEMPLATES = {
 const MENU = [
   ['New board', 'newBoard', '⌘N'], ['Open…', 'open', '⌘O'], ['Save', 'save', '⌘S'], ...(NATIVE ? [['Save As…', 'saveAs', '⇧⌘S']] : []),
   ['Export as PNG', 'export', '⌘E'], '-', ...Object.keys(TEMPLATES).map(t => [t, 'tpl:' + t, '']), '-',
+  ...(CLOUD ? [['My boards…', 'boards', '']] : []),
   ['Zoom to fit', 'fit', '⇧1'], ['Toggle grid', 'grid', 'G'], ['Theme: auto / light / dark', 'theme', ''], ['Clear board', 'clear', ''],
 ];
 $('#menu').innerHTML = MENU.map((m, i) => m === '-' ? '<div class="hsep"></div>' + (i > 5 && MENU[i + 1] && MENU[i + 1][1].startsWith('tpl:') ? '<div class="lbl">Templates</div>' : '') :
@@ -1369,6 +1441,7 @@ $('#menu').addEventListener('click', e => {
       try { localStorage.setItem('ideaboard.theme', next); } catch (e) {}
       toast('Theme: ' + next);
     },
+    boards: () => showBoards(),
     clear: () => { if (!items.length) return; pushUndo(); items = []; sel.clear(); changed(); toast('Board cleared — ⌘Z to undo'); },
   })[m]();
 });
@@ -1469,7 +1542,7 @@ let syncTimer = 0;
 function scheduleSync() { if (!syncTimer) syncTimer = setTimeout(syncOut, 40); }
 function syncOut() {
   syncTimer = 0;
-  if (!collab.on) return;
+  if (!collab.on && !cloud.on) return;
   const cur = new Map(items.map(i => [i.id, keyOf(i)]));
   const up = [], del = [];
   for (const [id, s] of cur) if (collab.lastSync.get(id) !== s) up.push(JSON.parse(s));
@@ -1480,7 +1553,7 @@ function syncOut() {
   const msg = { t: 'ops', up, del };
   if (oc) msg.order = items.map(i => i.id);
   if (nm) msg.name = boardName;
-  sendAll(msg);
+  if (cloud.on) cloudWrite(msg); else sendAll(msg);
 }
 function sendAll(msg, except) {
   try {
@@ -1519,7 +1592,7 @@ function sendCursor(e) {
   if (collab.role === 'host') msg.id = collab.me.id;
   sendAll(msg);
 }
-document.addEventListener('mouseleave', () => { if (collab.on) sendAll({ t: 'cursor', id: collab.role === 'host' ? collab.me.id : undefined, gone: true }); });
+document.addEventListener('mouseleave', () => { if (cloud.on && cloud.presenceRef) cloud.presenceRef.update({ gone: true }).catch(() => {}); if (collab.on) sendAll({ t: 'cursor', id: collab.role === 'host' ? collab.me.id : undefined, gone: true }); });
 function peopleList() { return [...collab.people.entries()].map(([id, p]) => ({ id, name: p.name, color: p.color, host: !!p.host })); }
 function broadcastPeople() { sendAll({ t: 'peers', people: peopleList() }); renderShare(); drawCursors(); }
 
@@ -1675,7 +1748,7 @@ addEventListener('beforeunload', () => { if (collab.peer) try { collab.peer.dest
 const CURSOR_SVG = c => `<svg width="18" height="20" viewBox="0 0 18 20"><path d="M2 1.5l13 8-6.2 1.3-3.2 6.2z" fill="${c}" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/></svg>`;
 function drawCursors() {
   const box = $('#cursors');
-  if (!collab.on) { box.innerHTML = ''; return; }
+  if (!collab.on && !cloud.on) { box.innerHTML = ''; return; }
   let h = '';
   for (const [id, c] of collab.cursors) {
     const p = collab.people.get(id);
@@ -1694,12 +1767,34 @@ function drawCursors() {
 function showShare(v) { $('#sharepanel').classList.toggle('show', v); }
 function renderShare() {
   const ppl = peopleList();
-  $('#people').innerHTML = collab.on ? ppl.map(p => `<span style="background:${p.color}" title="${esc(p.name)}${p.id === collab.me.id ? ' (you)' : ''}${p.host ? ' · host' : ''}">${esc(initials(p.name))}</span>`).join('') : '';
+  $('#people').innerHTML = (collab.on || cloud.on) ? ppl.map(p => `<span style="background:${p.color}" title="${esc(p.name)}${p.id === collab.me.id ? ' (you)' : ''}${p.host ? ' · host' : ''}">${esc(initials(p.name))}</span>`).join('') : '';
   $('#sharebtn').innerHTML = collab.on ? '<i class="live-dot"></i>Live' : collab.connecting ? 'Connecting…' : 'Share';
   const nameRow = `<label for="myname">Your name <em>· remembered on this device</em></label><input id="myname" value="${esc(myName())}" maxlength="30" spellcheck="false">`;
   const list = '<ul>' + ppl.map(p => `<li><i style="background:${p.color}"></i>${esc(p.name)}${p.id === collab.me.id ? ' <em>(you)</em>' : ''}${p.host ? ' <em>· host</em>' : ''}</li>`).join('') + '</ul>';
   let h;
-  if (collab.connecting) h = `<h3>Connecting…</h3><p>Reaching the other computer. This usually takes a few seconds.</p><button class="wide" data-s="cancel">Cancel</button>`;
+  if (cloud.on) {
+    $('#sharebtn').innerHTML = ppl.length > 1 ? '<i class="live-dot"></i>Share' : 'Share';
+    const owner = cloud.role === 'owner', mem = Object.entries(cloud.members || {});
+    const online = new Set([...collab.people.values()].map(p => p.name));
+    const meta = cloud.meta || {};
+    h = `<h3>Share “${esc(boardName)}”</h3><p>People you invite can open and edit this board after signing in with that email. Changes and cursors appear live.</p>
+      ${owner ? `<div class="row"><input id="invite" type="email" placeholder="name@example.com" spellcheck="false"><button class="primary" data-s="invite">Invite</button></div>` : ''}
+      <label>Board link <em>· only works for people with access</em></label>
+      <div class="row"><input id="sharelink" readonly value="${esc(shareBase() + '#board=' + cloud.id)}"><button data-s="copy">Copy</button></div>
+      <label>People with access (${mem.length + 1})</label><ul>
+      <li><i style="background:${personColor(meta.owner || '')}"></i>${esc(meta.ownerName || meta.ownerEmail || 'Owner')}${owner ? ' <em>(you)</em>' : ''} <em>· owner</em></li>
+      ${mem.map(([k, m]) => `<li><i style="background:var(--line)"></i>${esc(m.email)}${m.email === cloud.user.email ? ' <em>(you)</em>' : ''}${owner ? `<button class="x" data-s="remove" data-k="${esc(k)}" title="Remove access">×</button>` : ''}</li>`).join('')}
+      </ul>
+      ${ppl.length > 1 ? `<label>Here now</label>${list}` : ''}
+      <button class="wide" data-s="boards">All my boards</button>`;
+  } else if (CLOUD && cloud.user && !collab.on && !collab.connecting) {
+    h = `<h3>Share this board</h3><p>Save it to your account, then invite people by email. Everyone sees changes and cursors live, even when you're offline.</p>
+      <button class="primary wide" data-s="upload">Save to my account &amp; share</button>
+      <button class="wide" data-s="boards">Open one of my boards</button>
+      <div class="or">or a quick session</div>
+      <button class="wide" data-s="host">Start a peer-to-peer session</button>
+      <div class="row" style="margin-top:8px"><input id="joincode" placeholder="Paste a session link or code" spellcheck="false" value="${esc(collab.prefill)}"><button class="primary" data-s="join">Join</button></div>`;
+  } else if (collab.connecting) h = `<h3>Connecting…</h3><p>Reaching the other computer. This usually takes a few seconds.</p><button class="wide" data-s="cancel">Cancel</button>`;
   else if (!collab.on) h = `<h3>Work together live</h3><p>Start a live session and send the link. Everyone sees changes and cursors as they happen.</p>
     ${nameRow}
     <button class="primary wide" data-s="host">Start live session</button>
@@ -1732,6 +1827,10 @@ $('#sharepanel').addEventListener('click', e => {
   else if (s === 'join') joinSession($('#joincode').value);
   else if (s === 'cancel') leaveSession(true);
   else if (s === 'leave') { leaveSession(false); showShare(false); }
+  else if (s === 'upload') { showShare(false); uploadCurrent(); }
+  else if (s === 'boards') { showShare(false); showBoards(); }
+  else if (s === 'invite') inviteEmail($('#invite').value).then(ok => { if (ok && $('#invite')) $('#invite').value = ''; });
+  else if (s === 'remove') removeMember(b.dataset.k);
   else if (s === 'copy') {
     const inp = $('#sharelink'), link = inp.value;
     const done = () => { b.textContent = 'Copied'; setTimeout(() => { b.textContent = 'Copy'; }, 1500); };
@@ -1742,9 +1841,401 @@ $('#sharepanel').addEventListener('click', e => {
 $('#sharepanel').addEventListener('keydown', e => {
   if (e.key !== 'Enter') return;
   if (e.target.id === 'joincode') joinSession(e.target.value);
+  else if (e.target.id === 'invite') inviteEmail(e.target.value).then(ok => { if (ok && $('#invite')) $('#invite').value = ''; });
   else if (e.target.id === 'myname' && !collab.on) startHosting();
 });
 $('#sharepanel').addEventListener('change', e => { if (e.target.id === 'myname') setMyName(e.target.value.trim()); });
+
+// ---------- accounts & cloud boards (Firebase) ----------
+const ekey = e => String(e || '').trim().toLowerCase().replace(/\./g, ',');
+const TS = () => firebase.database.ServerValue.TIMESTAMP;
+const BLANK_IMG = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+function hash53(str) { // cyrb53: short stable id for image data
+  let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+  for (let i = 0; i < str.length; i++) { const ch = str.charCodeAt(i); h1 = Math.imul(h1 ^ ch, 2654435761); h2 = Math.imul(h2 ^ ch, 1597334677); }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(36);
+}
+function loadScript(src) {
+  return new Promise((res, rej) => { const s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = () => { s.remove(); rej(new Error(src)); }; document.head.appendChild(s); });
+}
+const authShown = () => $('#auth').classList.contains('show');
+
+async function initCloud() {
+  if (!CLOUD) return;
+  showAuth('loading');
+  try {
+    for (const m of ['app', 'auth', 'database']) await loadScript(`https://www.gstatic.com/firebasejs/${FB_VER}/firebase-${m}-compat.js`);
+  } catch (e) {
+    hideAuth(); toast("You're offline: sign-in and cloud boards are unavailable, but you can keep working on this device.");
+    return;
+  }
+  firebase.initializeApp(fbConfig);
+  cloud.auth = firebase.auth(); cloud.db = firebase.database();
+  if (EMU) { cloud.auth.useEmulator('http://127.0.0.1:9099', { disableWarnings: true }); cloud.db.useEmulator('127.0.0.1', 9000); }
+  cloud.auth.onAuthStateChanged(u => authChanged(u));
+}
+function authChanged(u) {
+  cloud.user = u;
+  renderAccount();
+  if (!u) { closeCloud(); showAuth('signin'); return; }
+  if (!u.emailVerified) { showAuth('verify'); return; }
+  identity.name = (u.displayName || u.email.split('@')[0]).slice(0, 30);
+  ls.set('ideaboard.name', identity.name);
+  post({ cmd: 'identity', id: identity.id, name: identity.name });
+  hideAuth(); renderAccount(); renderShare();
+  const want = cloud.pendingBoard || (!cloud.on && ls.get('ideaboard.lastCloud'));
+  cloud.pendingBoard = null;
+  if (want && !cloud.on) openCloud(want, true);
+  if (cloud.pendingJoin) { const c = cloud.pendingJoin; cloud.pendingJoin = null; joinSession(c); }
+}
+
+// --- sign-in screens ---
+const AUTH_ERR = {
+  'auth/email-already-in-use': 'An account with this email already exists. Sign in instead.',
+  'auth/invalid-email': "That email address doesn't look right.",
+  'auth/weak-password': 'Use at least 6 characters for the password.',
+  'auth/missing-password': 'Enter your password.',
+  'auth/invalid-credential': 'Email or password is incorrect.',
+  'auth/invalid-login-credentials': 'Email or password is incorrect.',
+  'auth/wrong-password': 'Email or password is incorrect.',
+  'auth/user-not-found': 'Email or password is incorrect.',
+  'auth/user-disabled': 'This account has been disabled.',
+  'auth/too-many-requests': 'Too many attempts. Wait a minute and try again.',
+  'auth/network-request-failed': "Can't reach the server. Check your internet connection.",
+  name: 'Enter your name so others know who you are.',
+};
+const authError = x => AUTH_ERR[x && x.code] || (x && x.message) || 'Something went wrong. Try again.';
+function showAuth(mode, note) {
+  const el = $('#auth');
+  const u = cloud.user;
+  const brand = '<div class="brand"><i class="mark"></i><b>Idea Board</b></div>';
+  const noteHtml = note ? `<p class="ok">${esc(note)}</p>` : '';
+  let h;
+  if (mode === 'loading') h = `${brand}<p class="sub center">Connecting…</p>`;
+  else if (mode === 'signin') h = `${brand}<h2>Sign in</h2><p class="sub">Your boards are saved to your account and can be shared with your team.</p>${noteHtml}
+    <form data-f="signin" novalidate><label>Email<input type="email" name="email" autocomplete="username" required></label>
+    <label>Password<input type="password" name="pw" autocomplete="current-password" required></label>
+    <div class="err" role="alert"></div><button class="primary wide" type="submit">Sign in</button></form>
+    <div class="links"><a href="#" data-go="reset">Forgot password?</a><span>New here? <a href="#" data-go="signup">Create an account</a></span></div>`;
+  else if (mode === 'signup') h = `${brand}<h2>Create your account</h2><p class="sub">We'll email you a link to confirm your address.</p>
+    <form data-f="signup" novalidate><label>Your name<input name="name" autocomplete="name" maxlength="30" required></label>
+    <label>Email<input type="email" name="email" autocomplete="username" required></label>
+    <label>Password <em>at least 6 characters</em><input type="password" name="pw" autocomplete="new-password" minlength="6" required></label>
+    <div class="err" role="alert"></div><button class="primary wide" type="submit">Create account</button></form>
+    <div class="links"><span>Already have an account? <a href="#" data-go="signin">Sign in</a></span></div>`;
+  else if (mode === 'reset') h = `${brand}<h2>Reset your password</h2><p class="sub">Enter your email and we'll send you a link to choose a new password.</p>
+    <form data-f="reset" novalidate><label>Email<input type="email" name="email" autocomplete="username" required></label>
+    <div class="err" role="alert"></div><button class="primary wide" type="submit">Send reset link</button></form>
+    <div class="links"><a href="#" data-go="signin">Back to sign in</a></div>`;
+  else if (mode === 'verify') h = `${brand}<h2>Confirm your email</h2><p class="sub">We sent a link to <b>${esc(u ? u.email : '')}</b>. Open it, then come back and continue. Check your spam folder if you don't see it.</p>${noteHtml}
+    <div class="err" role="alert"></div><button class="primary wide" data-a="verified">I've confirmed my email</button>
+    <button class="wide" data-a="resend">Send the link again</button>
+    <div class="links"><a href="#" data-a="signout">Use a different account</a></div>`;
+  el.innerHTML = `<div class="card panel">${h}</div>`;
+  el.classList.add('show');
+  endEdit(); showShare(false); closeMenu();
+  const first = el.querySelector('input'); if (first) setTimeout(() => first.focus(), 30);
+}
+function hideAuth() { $('#auth').classList.remove('show'); $('#auth').innerHTML = ''; refocus(); }
+$('#auth').addEventListener('submit', async e => {
+  e.preventDefault();
+  const f = e.target, kind = f.dataset.f, v = Object.fromEntries(new FormData(f));
+  const err = f.querySelector('.err'), btn = f.querySelector('button[type=submit]');
+  const email = String(v.email || '').trim().toLowerCase();
+  err.textContent = ''; btn.disabled = true;
+  try {
+    if (kind === 'signin') await cloud.auth.signInWithEmailAndPassword(email, v.pw || '');
+    else if (kind === 'signup') {
+      const name = String(v.name || '').trim();
+      if (!name) throw { code: 'name' };
+      const c = await cloud.auth.createUserWithEmailAndPassword(email, v.pw || '');
+      await c.user.updateProfile({ displayName: name });
+      await c.user.sendEmailVerification();
+      showAuth('verify');
+    } else if (kind === 'reset') {
+      await cloud.auth.sendPasswordResetEmail(email);
+      showAuth('signin', 'If an account exists for that email, a reset link is on its way.');
+    }
+  } catch (x) { err.textContent = authError(x); btn.disabled = false; }
+});
+$('#auth').addEventListener('click', async e => {
+  const a = e.target.closest('[data-go],[data-a]'); if (!a) return;
+  e.preventDefault();
+  if (a.dataset.go) return showAuth(a.dataset.go);
+  const u = cloud.auth.currentUser, err = $('#auth .err');
+  try {
+    if (a.dataset.a === 'signout') await cloud.auth.signOut();
+    else if (a.dataset.a === 'resend') { await u.sendEmailVerification(); showAuth('verify', 'Sent again. It can take a minute to arrive.'); }
+    else if (a.dataset.a === 'verified') {
+      a.disabled = true;
+      await u.reload();
+      if (cloud.auth.currentUser.emailVerified) { await cloud.auth.currentUser.getIdToken(true); authChanged(cloud.auth.currentUser); }
+      else { err.textContent = "Not confirmed yet. Open the link in the email first."; a.disabled = false; }
+    }
+  } catch (x) { if (err) err.textContent = authError(x); a.disabled = false; }
+});
+
+// --- account button & menu ---
+function renderAccount() {
+  const b = $('#acctbtn'), u = cloud.user;
+  b.hidden = !(CLOUD && u && u.emailVerified);
+  if (!b.hidden) { b.textContent = initials(identity.name || u.email); b.title = (identity.name || '') + ' · ' + u.email; }
+}
+$('#acctbtn').addEventListener('click', e => {
+  e.stopPropagation();
+  const m = $('#acctmenu'), u = cloud.user; if (!u) return;
+  if (m.classList.toggle('show')) m.innerHTML = `<div class="who"><b>${esc(identity.name)}</b><span>${esc(u.email)}</span></div>
+    <div class="hsep"></div><button data-a="boards">My boards</button><button data-a="signout">Sign out</button>`;
+});
+$('#acctmenu').addEventListener('click', async e => {
+  const b = e.target.closest('button'); if (!b) return;
+  $('#acctmenu').classList.remove('show');
+  if (b.dataset.a === 'boards') showBoards();
+  if (b.dataset.a === 'signout') { closeCloud(); await cloud.auth.signOut(); }
+});
+document.addEventListener('pointerdown', e => {
+  if (!e.target.closest('#acctmenu,#acctbtn')) $('#acctmenu').classList.remove('show');
+  if (!e.target.closest('#boards,[data-a=boards],[data-m=boards],[data-s=boards]')) $('#boards').classList.remove('show');
+});
+
+// --- boards list ---
+let boardsTab = 'mine';
+async function showBoards(tab) {
+  if (!cloud.user) return;
+  if (tab) boardsTab = tab;
+  const p = $('#boards');
+  p.classList.add('show');
+  p.innerHTML = '<p class="sub center">Loading your boards…</p>';
+  let mine = {}, shared = {};
+  try {
+    const [a, b] = await Promise.all([
+      cloud.db.ref('userBoards/' + cloud.user.uid).once('value'),
+      cloud.db.ref('sharedWith/' + ekey(cloud.user.email)).once('value'),
+    ]);
+    mine = a.val() || {}; shared = b.val() || {};
+  } catch (x) { p.innerHTML = `<p class="sub center">Couldn't load your boards. ${esc(x.message || '')}</p>`; return; }
+  const when = t => t ? new Date(t).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }) : '';
+  const rows = boardsTab === 'mine'
+    ? Object.entries(mine).sort((a, b) => (b[1].updated || 0) - (a[1].updated || 0)).map(([id, x]) =>
+        `<li data-open="${esc(id)}" class="${cloud.id === id ? 'cur' : ''}"><div><b>${esc(x.name || 'Untitled board')}</b><span>Edited ${esc(when(x.updated))}</span></div><button data-b="del" data-id="${esc(id)}" title="Delete board">${icon('trash')}</button></li>`)
+    : Object.entries(shared).sort((a, b) => (b[1].added || 0) - (a[1].added || 0)).map(([id, x]) =>
+        `<li data-open="${esc(id)}" class="${cloud.id === id ? 'cur' : ''}"><div><b>${esc(x.name || 'Untitled board')}</b><span>From ${esc(x.ownerName || x.ownerEmail || 'someone')}</span></div><button data-b="leave" data-id="${esc(id)}" title="Remove from my list">${icon('trash')}</button></li>`);
+  const empty = boardsTab === 'mine' ? 'No boards yet. Create one, or upload the board you have open.' : 'Nothing shared with you yet. When someone invites ' + esc(cloud.user.email) + ', their board shows up here.';
+  p.innerHTML = `<div class="bhead"><h3>Boards</h3><button data-b="close" title="Close">×</button></div>
+    <div class="tabs"><button data-t="mine" class="${boardsTab === 'mine' ? 'on' : ''}">My boards (${Object.keys(mine).length})</button><button data-t="shared" class="${boardsTab === 'shared' ? 'on' : ''}">Shared with me (${Object.keys(shared).length})</button></div>
+    <ul>${rows.join('') || `<li class="empty">${empty}</li>`}</ul>
+    <div class="bfoot"><button class="primary" data-b="new">New board</button>${!cloud.on && items.length ? '<button data-b="upload">Save this board to my account</button>' : ''}</div>`;
+}
+$('#boards').addEventListener('click', async e => {
+  const t = e.target.closest('[data-t]'); if (t) return showBoards(t.dataset.t);
+  const b = e.target.closest('[data-b]');
+  if (b) {
+    e.stopPropagation();
+    const id = b.dataset.id;
+    if (b.dataset.b === 'close') $('#boards').classList.remove('show');
+    else if (b.dataset.b === 'new') { $('#boards').classList.remove('show'); const nid = await createCloudBoard('Untitled board', []); if (nid) openCloud(nid); }
+    else if (b.dataset.b === 'upload') { $('#boards').classList.remove('show'); uploadCurrent(); }
+    else if (b.dataset.b === 'del' && confirm('Delete this board for everyone? This cannot be undone.')) { await deleteCloudBoard(id); showBoards(); }
+    else if (b.dataset.b === 'leave') { await leaveSharedBoard(id); showBoards(); }
+    return;
+  }
+  const row = e.target.closest('[data-open]');
+  if (row) { $('#boards').classList.remove('show'); openCloud(row.dataset.open); }
+});
+
+// --- cloud board data ---
+function encodeItem(it, z, bid, up) {
+  const o = strip(it);
+  if (o.type === 'image' && typeof o.src === 'string' && o.src.startsWith('data:')) {
+    const h = hash53(o.src);
+    if (!cloud.uploaded.has(bid + h)) { up[`boards/${bid}/blobs/${h}`] = o.src; cloud.uploaded.add(bid + h); }
+    cloud.blobs.set(h, o.src);
+    o.src = 'blob:' + h;
+  }
+  return { j: JSON.stringify(o), z };
+}
+function decodeItem(x) {
+  const o = JSON.parse(x.j);
+  if (typeof o.src === 'string' && o.src.startsWith('blob:')) {
+    const h = o.src.slice(5);
+    if (cloud.blobs.has(h)) o.src = cloud.blobs.get(h);
+    else { o.src = BLANK_IMG; fetchBlob(h, o.id); }
+  }
+  return o;
+}
+function fetchBlob(h, itemId) {
+  const bid = cloud.id;
+  cloud.db.ref(`boards/${bid}/blobs/${h}`).once('value').then(s => {
+    if (cloud.id !== bid || !s.exists()) return;
+    cloud.blobs.set(h, s.val()); cloud.uploaded.add(bid + h);
+    const it = byId.get(itemId);
+    if (it && it.src === BLANK_IMG) { it.src = s.val(); collab.lastSync.set(it.id, keyOf(it)); render(); }
+  }).catch(() => {});
+}
+async function createCloudBoard(name, list) {
+  const u = cloud.user; if (!u) return null;
+  try {
+    const id = cloud.db.ref('boards').push().key;
+    await cloud.db.ref(`boards/${id}/meta`).set({ name, owner: u.uid, ownerEmail: u.email, ownerName: identity.name, created: TS(), updated: TS() });
+    const up = {};
+    list.forEach((it, i) => { up[`boards/${id}/items/${it.id}`] = encodeItem(it, i, id, up); });
+    up[`userBoards/${u.uid}/${id}`] = { name, updated: TS() };
+    await cloud.db.ref().update(up);
+    return id;
+  } catch (x) { toast("Couldn't create the board: " + (x.message || x)); return null; }
+}
+async function uploadCurrent() {
+  if (!cloud.user || !items.length) return;
+  const id = await createCloudBoard(boardName || 'Untitled board', items.slice());
+  if (id) { await openCloud(id); toast('Saved to your account. Share it from the Share button.'); }
+}
+async function deleteCloudBoard(id) {
+  try {
+    const m = (await cloud.db.ref(`boards/${id}/members`).once('value')).val() || {};
+    const up = {};
+    for (const k of ['meta', 'items', 'blobs', 'presence']) up[`boards/${id}/${k}`] = null;
+    for (const k of Object.keys(m)) { up[`boards/${id}/members/${k}`] = null; up[`sharedWith/${k}/${id}`] = null; }
+    up[`userBoards/${cloud.user.uid}/${id}`] = null;
+    if (cloud.id === id) closeCloud();
+    await cloud.db.ref().update(up);
+    if (ls.get('ideaboard.lastCloud') === id) ls.set('ideaboard.lastCloud', '');
+    toast('Board deleted');
+  } catch (x) { toast("Couldn't delete: " + (x.message || x)); }
+}
+async function leaveSharedBoard(id) {
+  const k = ekey(cloud.user.email);
+  try {
+    if (cloud.id === id) closeCloud();
+    await cloud.db.ref().update({ [`sharedWith/${k}/${id}`]: null, [`boards/${id}/members/${k}`]: null });
+  } catch (x) {
+    await cloud.db.ref(`sharedWith/${k}/${id}`).remove().catch(() => {}); // board may already be gone
+  }
+}
+function personColor(uid) { let h = 0; for (const c of uid) h = (h * 31 + c.charCodeAt(0)) >>> 0; return PCOLORS[h % PCOLORS.length]; }
+function orderFromZ() { return [...cloud.z.entries()].sort((a, b) => a[1] - b[1]).map(e => e[0]); }
+
+async function openCloud(id, quiet) {
+  if (!cloud.user || !cloud.db) { cloud.pendingBoard = id; return; }
+  if (collab.on || collab.connecting) leaveSession(true);
+  closeCloud();
+  const base = cloud.db.ref('boards/' + id);
+  let v;
+  try { const s = await base.once('value'); v = s.val(); }
+  catch (x) {
+    if (ls.get('ideaboard.lastCloud') === id) ls.set('ideaboard.lastCloud', '');
+    if (!quiet) toast(/permission/i.test(x.message || x.code || '') ? `You don't have access to that board. Ask its owner to invite ${cloud.user.email}.` : "Couldn't open that board.");
+    return;
+  }
+  if (!v || !v.meta) { if (!quiet) toast('That board no longer exists.'); if (ls.get('ideaboard.lastCloud') === id) ls.set('ideaboard.lastCloud', ''); return; }
+  const uid = cloud.user.uid;
+  Object.assign(cloud, { on: true, id, meta: v.meta, role: v.meta.owner === uid ? 'owner' : 'editor', members: v.members || {} });
+  cloud.blobs = new Map(Object.entries(v.blobs || {}));
+  cloud.uploaded = new Set(Object.keys(v.blobs || {}).map(h => id + h));
+  const list = Object.values(v.items || {}).filter(x => x && x.j).map(x => { try { return { o: decodeItem(x), z: x.z || 0 }; } catch (e) { return null; } })
+    .filter(Boolean).sort((a, b) => a.z - b.z);
+  cloud.z = new Map(list.map(x => [x.o.id, x.z]));
+  endEdit();
+  items = list.map(x => x.o);
+  boardName = v.meta.name || 'Untitled board'; $('#name').value = boardName;
+  sel.clear(); undoStack = []; redoStack = []; pendingBase = null; els.forEach(e => e.remove()); els.clear();
+  render(); fit(); resetSyncBase();
+  dirty = true; setDirty(false); autosave();
+  ls.set('ideaboard.lastCloud', id);
+  post({ cmd: 'cloud', id, name: boardName });
+
+  const on = (ref, ev, fn) => { ref.on(ev, fn, err => cloudLost(err)); cloud.listeners.push([ref, ev, fn]); };
+  const itemsRef = base.child('items');
+  const upd = s => {
+    const x = s.val(); if (!x || !x.j) return;
+    let o; try { o = decodeItem(x); } catch (e) { return; }
+    const zOld = cloud.z.get(o.id); cloud.z.set(o.id, x.z || 0);
+    if (byId.has(o.id) && collab.lastSync.get(o.id) === keyOf(o) && zOld === x.z) return; // our own echo
+    applyRemote({ up: [o], order: orderFromZ() });
+  };
+  on(itemsRef, 'child_added', upd);
+  on(itemsRef, 'child_changed', upd);
+  on(itemsRef, 'child_removed', s => { cloud.z.delete(s.key); if (byId.has(s.key)) applyRemote({ del: [s.key] }); });
+  on(base.child('meta'), 'value', s => {
+    const m = s.val();
+    if (!m) { toast('This board was deleted by its owner.'); closeCloud(); return; }
+    cloud.meta = m;
+    if (m.name && m.name !== boardName) { boardName = m.name; collab.lastName = m.name; if (document.activeElement !== $('#name')) $('#name').value = m.name; post({ cmd: 'cloud', id, name: m.name }); }
+  });
+  on(base.child('members'), 'value', s => { cloud.members = s.val() || {}; renderShare(); });
+  // presence: who's here + live cursors
+  collab.me = { id: uid, name: identity.name, color: personColor(uid) };
+  collab.people = new Map([[uid, { name: identity.name, color: collab.me.color, host: false }]]); // owner is shown in the access list
+  collab.cursors = new Map();
+  const pres = base.child('presence');
+  cloud.presenceRef = pres.child(uid);
+  cloud.presenceRef.onDisconnect().remove();
+  cloud.presenceRef.set({ name: identity.name, color: collab.me.color, t: TS() });
+  const pUp = s => {
+    if (s.key === uid) return;
+    const p = s.val() || {};
+    collab.people.set(s.key, { name: String(p.name || 'Someone').slice(0, 30), color: p.color || personColor(s.key), host: false });
+    if (typeof p.x === 'number') collab.cursors.set(s.key, { x: p.x, y: p.y, sel: p.sel || [], gone: !!p.gone });
+    renderShare(); drawCursors();
+  };
+  on(pres, 'child_added', p => { pUp(p); });
+  on(pres, 'child_changed', pUp);
+  on(pres, 'child_removed', s => { collab.people.delete(s.key); collab.cursors.delete(s.key); renderShare(); drawCursors(); });
+  renderShare();
+  if (!quiet) toast('Opened “' + boardName + '”');
+}
+function cloudLost(err) {
+  if (!cloud.on) return;
+  toast(/permission/i.test((err && (err.message || err.code)) || '') ? 'Your access to this board was removed.' : 'Lost connection to the board.');
+  closeCloud();
+}
+function closeCloud() {
+  if (!cloud.on) return;
+  for (const [ref, ev, fn] of cloud.listeners) ref.off(ev, fn);
+  cloud.listeners = [];
+  if (cloud.presenceRef) { cloud.presenceRef.onDisconnect().cancel(); cloud.presenceRef.remove().catch(() => {}); cloud.presenceRef = null; }
+  Object.assign(cloud, { on: false, id: null, role: null, meta: null, members: {} });
+  collab.people.clear(); collab.cursors.clear();
+  renderShare(); drawCursors();
+  post({ cmd: 'cloud', id: '', name: '' });
+}
+function cloudWrite(msg) {
+  const id = cloud.id, base = 'boards/' + id, up = {};
+  const idx = new Map(items.map((it, i) => [it.id, i]));
+  const sent = new Set();
+  for (const o of msg.up) { const z = idx.get(o.id); up[`${base}/items/${o.id}`] = encodeItem(o, z, id, up); cloud.z.set(o.id, z); sent.add(o.id); }
+  for (const d of msg.del) { up[`${base}/items/${d}`] = null; cloud.z.delete(d); }
+  if (msg.order) items.forEach((it, i) => { if (!sent.has(it.id) && cloud.z.get(it.id) !== i) { up[`${base}/items/${it.id}/z`] = i; cloud.z.set(it.id, i); } });
+  if (msg.name !== undefined) { up[`${base}/meta/name`] = msg.name; if (cloud.role === 'owner') up[`userBoards/${cloud.user.uid}/${id}/name`] = msg.name; }
+  up[`${base}/meta/updated`] = TS();
+  if (cloud.role === 'owner') up[`userBoards/${cloud.user.uid}/${id}/updated`] = TS();
+  cloud.db.ref().update(up).catch(x => { clog('cloud write ' + x.message); toast("Couldn't save to the cloud: " + (x.message || x)); });
+}
+let presT = 0;
+function cloudCursor(e) {
+  const now = performance.now(); if (now - presT < 90 || !cloud.presenceRef) return; presT = now;
+  const p = toWorld(e.clientX, e.clientY);
+  cloud.presenceRef.update({ x: r1(p.x), y: r1(p.y), sel: [...sel].slice(0, 50), gone: false, name: identity.name }).catch(() => {});
+}
+async function inviteEmail(email) {
+  email = String(email || '').trim().toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { toast("That email address doesn't look right."); return false; }
+  if (email === cloud.user.email.toLowerCase()) { toast("That's you — you already have access."); return false; }
+  const k = ekey(email), id = cloud.id;
+  try {
+    await cloud.db.ref().update({
+      [`boards/${id}/members/${k}`]: { email, added: TS() },
+      [`sharedWith/${k}/${id}`]: { name: boardName, ownerEmail: cloud.user.email, ownerName: identity.name, added: TS() },
+    });
+    toast(email + ' can now open this board. Send them the link.');
+    return true;
+  } catch (x) { toast("Couldn't invite: " + (x.message || x)); return false; }
+}
+async function removeMember(k) {
+  try { await cloud.db.ref().update({ [`boards/${cloud.id}/members/${k}`]: null, [`sharedWith/${k}/${cloud.id}`]: null }); }
+  catch (x) { toast("Couldn't remove: " + (x.message || x)); }
+}
 
 // ---------- public API (used by the Mac app) ----------
 window.app = {
@@ -1754,6 +2245,11 @@ window.app = {
   setDirty(v) { dirty = !v; setDirty(!!v); },
   addImageData(dataURL) { const img = new Image(); img.onload = () => { pushUndo(); const p = toWorld(innerWidth / 2, innerHeight / 2), s = Math.min(1, 640 / Math.max(img.width, img.height)); add({ type: 'image', src: dataURL, x: r1(p.x - img.width * s / 2), y: r1(p.y - img.height * s / 2), w: r1(img.width * s), h: r1(img.height * s) }); changed(); }; img.src = dataURL; },
   join: (code, confirmed) => joinSession(code, confirmed),
+  showBoards: () => CLOUD && cloud.user ? showBoards() : toast('Sign in to see your boards'),
+  openBoard: id => openCloud(id),
+  signOut: () => cloud.auth && cloud.auth.signOut(),
+  _cloud: () => ({ enabled: CLOUD, user: cloud.user ? cloud.user.email : null, verified: !!(cloud.user && cloud.user.emailVerified), on: cloud.on, id: cloud.id, role: cloud.role, n: items.length }),
+  _signIn: (e, p) => cloud.auth.signInWithEmailAndPassword(e, p).then(() => 'ok', x => x.code),
   openShare: () => { renderShare(); showShare(true); },
   leaveSession: () => leaveSession(false),
   inSession: () => collab.on ? collab.role : '',
@@ -1767,8 +2263,12 @@ let initial = window.__IDEABOARD_INITIAL || null;
 if (!initial && !NATIVE) try { initial = localStorage.getItem('ideaboard.autosave'); } catch (e) {}
 if (initial) { load(initial); if (window.__IDEABOARD_DIRTY) setDirty(true); } else render();
 renderShare();
+const hashBoard = location.hash.match(/board=([-\w]{6,40})/);
+if (hashBoard) { cloud.pendingBoard = hashBoard[1]; history.replaceState(null, '', location.pathname + location.search); }
 const hashJoin = location.hash.match(/join=([a-z0-9]{6,16})/i);
-if (hashJoin) {
+if (hashJoin && CLOUD) { cloud.pendingJoin = hashJoin[1].toLowerCase(); history.replaceState(null, '', location.pathname + location.search); }
+initCloud();
+if (hashJoin && !CLOUD) {
   collab.prefill = hashJoin[1].toLowerCase();
   history.replaceState(null, '', location.pathname + location.search);
   renderShare(); showShare(true);

@@ -49,6 +49,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate,
         let uc = WKUserContentController()
         uc.add(self, name: "board")
         var boot = "window.__IDEABOARD_NATIVE=true;"
+        if ProcessInfo.processInfo.environment["IDEABOARD_EMULATOR"] == "1" { boot += "window.__IDEABOARD_EMULATOR=true;" }
         // Remembered collaboration identity: a random per-install device ID (never a hardware ID)
         // and a display name that defaults to the Mac account's first name.
         let ud = appDefaults
@@ -115,8 +116,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate,
     func application(_ app: NSApplication, open urls: [URL]) {
         guard let url = urls.first else { return }
         if url.scheme?.lowercased() == "ideaboard" {
-            // ideaboard://join/CODE
+            // ideaboard://join/CODE  or  ideaboard://board/ID
             let code = url.pathComponents.last(where: { $0 != "/" }) ?? url.host ?? ""
+            if url.host == "board" {
+                let open = { self.web.callAsyncJavaScript("app.openBoard(id)", arguments: ["id": code], in: nil, in: .page) { _ in } }
+                if ready { open() } else { DispatchQueue.main.asyncAfter(deadline: .now() + 2, execute: open) }
+                return
+            }
             if ready { join(code) } else { pendingJoin = code }
             return
         }
@@ -124,6 +130,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate,
     }
 
     var pendingJoin: String?
+    var cloudBoard: String?
+    var cloudName = ""
     var liveActivity: NSObjectProtocol?
     var sessionRole = ""
 
@@ -144,6 +152,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate,
     }
 
     @objc func shareSession(_ s: Any?) { js("app.openShare()") }
+    @objc func showBoards(_ s: Any?) { js("app.showBoards()") }
+    @objc func signOut(_ s: Any?) { js("app.signOut()") }
 
     // Image button in the page uses <input type=file>.
     func webView(_ w: WKWebView, runOpenPanelWith p: WKOpenPanelParameters, initiatedByFrame f: WKFrameInfo,
@@ -185,6 +195,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate,
             } else if liveActivity == nil {
                 liveActivity = ProcessInfo.processInfo.beginActivity(options: [.userInitiated], reason: "Live collaboration session")
             }
+        case "cloud":
+            // A cloud board is saved to the account, not to a file.
+            cloudBoard = (body["id"] as? String).flatMap { $0.isEmpty ? nil : $0 }
+            if cloudBoard != nil { fileURL = nil; dirty = false }
+            cloudName = body["name"] as? String ?? ""
+            updateTitle()
         case "identity":
             if let n = body["name"] as? String, !n.isEmpty { appDefaults.set(n, forKey: "displayName") }
         case "copy":
@@ -207,6 +223,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate,
 
     func updateTitle() {
         guard let window = window else { return }
+        if cloudBoard != nil {
+            window.title = cloudName.isEmpty ? "Idea Board" : cloudName
+            window.subtitle = "Saved to your account"
+            window.representedURL = nil
+            return
+        }
+        window.subtitle = ""
         if let u = fileURL {
             window.title = u.deletingPathExtension().lastPathComponent
             window.representedURL = u
@@ -376,6 +399,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate,
             item("Export as PNG…", #selector(exportPNG(_:)), "e"),
             .separator(),
             item("Work Together Live…", #selector(shareSession(_:)), "l", [.command, .shift]),
+            item("My Boards…", #selector(showBoards(_:)), "b", [.command, .shift]),
+            item("Sign Out", #selector(signOut(_:))),
         ]))
         main.addItem(sub("Edit", [
             item("Undo", #selector(undoBoard(_:)), "z"),
