@@ -13,6 +13,8 @@ text, connectors, freehand pen, frames, images and templates, with **live collab
   (or go to System Settings → Privacy & Security → **Open Anyway**).
 - **Browser (any computer or phone):** https://lemonspitz.github.io/IdeaBoard/ — nothing to install.
 
+You create a free account the first time (name, email, password) and confirm your email address.
+
 ## Work together live
 
 ![A live session: the host's share panel lists Alex, Ben and Citra, and Ben's and Citra's cursors and selections are visible on the board](docs/screenshots/live.png)
@@ -37,8 +39,8 @@ link or join code into **Share → Join**, or open `ideaboard://join/CODE`.
 Sign up with your email and a password, confirm the email, and your boards are saved to your
 account. Open them from any Mac or browser under **My boards**, and invite people by email from
 **Share**. Everyone with access sees changes and cursors live, even when the owner is offline.
-Invited boards show up under **Shared with me**. Accounts run on Firebase; see
-[FIREBASE-SETUP.md](FIREBASE-SETUP.md) for setting up the project.
+Invited boards show up under **Shared with me**. Accounts and boards are stored in Firebase
+(Singapore region); see [FIREBASE-SETUP.md](FIREBASE-SETUP.md) for how the project is set up.
 
 ## Features
 

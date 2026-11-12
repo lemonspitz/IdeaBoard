@@ -264,7 +264,15 @@ const EXT = 'ideaboard';
 // ---------- Firebase settings ----------
 // Paste your Firebase web-app config here (Project settings → Your apps). It is public by design;
 // access is enforced by the database rules in firebase/database.rules.json.
-const FIREBASE_CONFIG = null;
+const FIREBASE_CONFIG = {
+  apiKey: 'AIzaSyAS4OTZ4Ivo6pvIafBiXOzCFgEwGWaAJPA',
+  authDomain: 'idea-board-f83c5.firebaseapp.com',
+  databaseURL: 'https://idea-board-f83c5-default-rtdb.asia-southeast1.firebasedatabase.app',
+  projectId: 'idea-board-f83c5',
+  storageBucket: 'idea-board-f83c5.firebasestorage.app',
+  messagingSenderId: '152653941958',
+  appId: '1:152653941958:web:87f348b5220781a13e9bc7',
+};
 const FB_VER = '10.14.1';
 const EMU = /[?&]emulator=1/.test(location.search) || !!window.__IDEABOARD_EMULATOR;
 const fbConfig = EMU
