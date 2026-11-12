@@ -36,6 +36,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate,
         let uc = WKUserContentController()
         uc.add(self, name: "board")
         var boot = "window.__IDEABOARD_NATIVE=true;"
+        // Remembered collaboration identity: a random per-install device ID (never a hardware ID)
+        // and a display name that defaults to the Mac account's first name.
+        let ud = UserDefaults.standard
+        var device = ud.string(forKey: "deviceID") ?? ""
+        if device.isEmpty { device = UUID().uuidString.lowercased(); ud.set(device, forKey: "deviceID") }
+        let first = NSFullUserName().split(separator: " ").first.map(String.init) ?? ""
+        var ident: [String: String] = ["id": device, "defaultName": first.isEmpty ? NSUserName() : first]
+        if let n = ud.string(forKey: "displayName"), !n.isEmpty { ident["name"] = n }
+        if let d = try? JSONSerialization.data(withJSONObject: ident), let js = String(data: d, encoding: .utf8) {
+            boot += "window.__IDEABOARD_DEVICE=\(js);"
+        }
         if let s = try? String(contentsOf: autosaveURL, encoding: .utf8) {
             boot += "window.__IDEABOARD_INITIAL=\(jsString(s));"
             if UserDefaults.standard.bool(forKey: "dirty") { boot += "window.__IDEABOARD_DIRTY=true;" }
@@ -149,6 +160,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate,
         case "session":
             sessionRole = body["value"] as? String ?? ""
             updateTitle()
+        case "identity":
+            if let n = body["name"] as? String, !n.isEmpty { UserDefaults.standard.set(n, forKey: "displayName") }
         case "copy":
             if let v = body["value"] as? String {
                 NSPasteboard.general.clearContents()

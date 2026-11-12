@@ -17,6 +17,10 @@ can paste the link or join code into **Share → Join**, or open `ideaboard://jo
 - The host's board is the hub. The session lasts while the host keeps the board open; when it ends,
   everyone keeps a copy.
 - Undo (⌘Z) only undoes your own changes, never someone else's.
+- No name to type: each device remembers its name (the Mac app uses your account's first name;
+  browsers get a friendly name like "Teal Otter"). Change it any time in the Share panel, even mid-session.
+  Devices are recognised by a random ID made on first use, never a hardware ID, so returning
+  collaborators keep their colour.
 - Very strict company or school networks can block peer-to-peer connections.
 
 ## Build

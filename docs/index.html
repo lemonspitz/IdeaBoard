@@ -1394,8 +1394,52 @@ const collab = {
 };
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const initials = n => (n.trim().split(/\s+/).map(w => w[0]).join('').slice(0, 2) || '?').toUpperCase();
-function myName() { try { return localStorage.getItem('ideaboard.name') || ''; } catch (e) { return ''; } }
-function setMyName(n) { try { localStorage.setItem('ideaboard.name', n); } catch (e) {} }
+// Each device gets a random ID once and keeps it, plus a remembered display name, so people
+// never have to type a name again. (No hardware IDs such as MAC addresses: browsers can't read
+// them, and they would identify the machine to everyone in the session.)
+const ADJS = ['Blue', 'Green', 'Coral', 'Golden', 'Silver', 'Purple', 'Orange', 'Teal', 'Amber', 'Indigo', 'Ruby', 'Mint'];
+const ANIMALS = ['Fox', 'Owl', 'Panda', 'Otter', 'Tiger', 'Koala', 'Falcon', 'Dolphin', 'Lynx', 'Robin', 'Heron', 'Badger'];
+const ls = { get: k => { try { return localStorage.getItem(k); } catch (e) { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} } };
+const identity = (() => {
+  const nat = window.__IDEABOARD_DEVICE || {};
+  let id = nat.id || ls.get('ideaboard.device');
+  let name = nat.name || ls.get('ideaboard.name');
+  if (!id) id = (crypto.randomUUID ? crypto.randomUUID() : 'd' + Date.now().toString(36) + Math.random().toString(36).slice(2));
+  if (!name) {
+    const a = new Uint32Array(2); crypto.getRandomValues(a);
+    name = nat.defaultName || (ADJS[a[0] % ADJS.length] + ' ' + ANIMALS[a[1] % ANIMALS.length]);
+  }
+  ls.set('ideaboard.device', id); ls.set('ideaboard.name', name);
+  return { id, name: String(name).slice(0, 30) };
+})();
+post({ cmd: 'identity', id: identity.id, name: identity.name });
+function myName() { return identity.name; }
+function setMyName(n) {
+  n = String(n || '').trim().slice(0, 30);
+  if (!n || n === identity.name) return;
+  identity.name = n;
+  ls.set('ideaboard.name', n);
+  post({ cmd: 'identity', id: identity.id, name: n });
+  if (!collab.on) return;
+  collab.me.name = n;
+  if (collab.role === 'host') { const p = collab.people.get(collab.me.id); if (p) p.name = n; broadcastPeople(); }
+  else sendAll({ t: 'rename', name: n });
+}
+// The host remembers devices it has seen, so a returning collaborator keeps their colour.
+function knownDevices() { try { return JSON.parse(ls.get('ideaboard.known') || '{}'); } catch (e) { return {}; } }
+function rememberDevice(dev, info) {
+  if (!dev) return;
+  const k = knownDevices(); k[dev] = { name: info.name, color: info.color, seen: Date.now() };
+  const keys = Object.keys(k).sort((a, b) => k[b].seen - k[a].seen).slice(0, 200);
+  ls.set('ideaboard.known', JSON.stringify(Object.fromEntries(keys.map(x => [x, k[x]]))));
+}
+function colorFor(dev) {
+  const used = new Set([...collab.people.values()].map(p => p.color));
+  const known = dev && knownDevices()[dev];
+  if (known && known.color && !used.has(known.color)) return known.color;
+  const free = PCOLORS.find(c => !used.has(c));
+  return free || PCOLORS[collab.colorN++ % PCOLORS.length];
+}
 function randCode() { let s = ''; const a = new Uint32Array(8); crypto.getRandomValues(a); for (const v of a) s += CODE_CHARS[v % CODE_CHARS.length]; return s; }
 function parseCode(input) {
   const s = String(input || '').trim();
@@ -1471,7 +1515,7 @@ function sendCursor(e) {
   sendAll(msg);
 }
 document.addEventListener('mouseleave', () => { if (collab.on) sendAll({ t: 'cursor', id: collab.role === 'host' ? collab.me.id : undefined, gone: true }); });
-function peopleList() { return [...collab.people.entries()].map(([id, p]) => ({ id, ...p })); }
+function peopleList() { return [...collab.people.entries()].map(([id, p]) => ({ id, name: p.name, color: p.color, host: !!p.host })); }
 function broadcastPeople() { sendAll({ t: 'peers', people: peopleList() }); renderShare(); drawCursors(); }
 
 async function startHosting(retry) {
@@ -1486,7 +1530,7 @@ async function startHosting(retry) {
   peer.on('open', id => {
     collab.connecting = false; collab.on = true; collab.role = 'host'; collab.code = code; collab.colorN = 1;
     collab.me = { id, name, color: PCOLORS[0] };
-    collab.people = new Map([[id, { name, color: PCOLORS[0], host: true }]]);
+    collab.people = new Map([[id, { name, color: PCOLORS[0], host: true, device: identity.id }]]);
     resetSyncBase(); renderShare(); showShare(true);
     toast('Live session started. Send the link to invite people.');
     post({ cmd: 'session', value: 'host' });
@@ -1508,15 +1552,28 @@ function hostReceive(conn, d) {
   if (!d || typeof d !== 'object') return;
   if (d.t === 'hello') {
     collab.conns.set(conn.peer, conn);
-    const color = PCOLORS[collab.colorN++ % PCOLORS.length];
+    const dev = typeof d.device === 'string' ? d.device.slice(0, 64) : '';
+    // Same device reconnecting (e.g. after a network blip): drop its stale entry.
+    for (const [pid, p] of collab.people) if (dev && p.device === dev && pid !== conn.peer && pid !== collab.me.id) {
+      const old = collab.conns.get(pid); collab.conns.delete(pid); collab.people.delete(pid); collab.cursors.delete(pid);
+      if (old) try { old.close(); } catch (e) {}
+    }
+    const color = colorFor(dev);
     const name = String(d.name || 'Guest').slice(0, 30);
-    collab.people.set(conn.peer, { name, color });
+    collab.people.set(conn.peer, { name, color, device: dev });
+    rememberDevice(dev, { name, color });
     conn.send({ t: 'init', items: items.map(strip), name: boardName, people: peopleList(), you: { id: conn.peer, color }, code: collab.code });
     broadcastPeople();
     toast(name + ' joined');
     return;
   }
   if (!collab.conns.has(conn.peer)) return;
+  if (d.t === 'rename') {
+    const p = collab.people.get(conn.peer);
+    const n = String(d.name || '').trim().slice(0, 30);
+    if (p && n && n !== p.name) { const old = p.name; p.name = n; rememberDevice(p.device, p); broadcastPeople(); toast(old + ' is now ' + n); }
+    return;
+  }
   if (d.t === 'ops') { applyRemote(d); sendAll(d, conn.peer); }
   else if (d.t === 'cursor') { d.id = conn.peer; collab.cursors.set(conn.peer, d); drawCursors(); sendAll(d, conn.peer); }
 }
@@ -1547,7 +1604,7 @@ async function joinSession(input, confirmed) {
     const conn = peer.connect('ideaboard-' + code, { reliable: true });
     collab.hostConn = conn;
     collab.joinTimer = setTimeout(() => { if (!collab.on) { toast('Could not reach that board. Is the host still online?'); cleanup(); } }, 20000);
-    conn.on('open', () => conn.send({ t: 'hello', name: myName() || 'Guest' }));
+    conn.on('open', () => conn.send({ t: 'hello', name: myName(), device: identity.id }));
     conn.on('data', guestReceive);
     conn.on('close', () => { if (collab.on) { toast('The live session ended. Your copy stays on this device.'); cleanup(); } });
   });
@@ -1622,11 +1679,12 @@ function renderShare() {
   const ppl = peopleList();
   $('#people').innerHTML = collab.on ? ppl.map(p => `<span style="background:${p.color}" title="${esc(p.name)}${p.id === collab.me.id ? ' (you)' : ''}${p.host ? ' · host' : ''}">${esc(initials(p.name))}</span>`).join('') : '';
   $('#sharebtn').innerHTML = collab.on ? '<i class="live-dot"></i>Live' : collab.connecting ? 'Connecting…' : 'Share';
+  const nameRow = `<label for="myname">Your name <em>· remembered on this device</em></label><input id="myname" value="${esc(myName())}" maxlength="30" spellcheck="false">`;
   const list = '<ul>' + ppl.map(p => `<li><i style="background:${p.color}"></i>${esc(p.name)}${p.id === collab.me.id ? ' <em>(you)</em>' : ''}${p.host ? ' <em>· host</em>' : ''}</li>`).join('') + '</ul>';
   let h;
   if (collab.connecting) h = `<h3>Connecting…</h3><p>Reaching the other computer. This usually takes a few seconds.</p><button class="wide" data-s="cancel">Cancel</button>`;
   else if (!collab.on) h = `<h3>Work together live</h3><p>Start a live session and send the link. Everyone sees changes and cursors as they happen.</p>
-    <label for="myname">Your name</label><input id="myname" value="${esc(myName())}" maxlength="30" spellcheck="false" placeholder="So others know who you are">
+    ${nameRow}
     <button class="primary wide" data-s="host">Start live session</button>
     <div class="or">or join one</div>
     <div class="row"><input id="joincode" placeholder="Paste a link or code" spellcheck="false" value="${esc(collab.prefill)}"><button class="primary" data-s="join">Join</button></div>
@@ -1634,15 +1692,19 @@ function renderShare() {
   else if (collab.role === 'host') h = `<h3><i class="live-dot"></i>Live session</h3><p>Anyone with this link can view and edit this board while you keep it open.</p>
     <div class="row"><input id="sharelink" readonly value="${esc(shareLink())}"><button class="primary" data-s="copy">Copy</button></div>
     <label>Join code (for the Mac app)</label><div class="code">${collab.code}</div>
+    ${nameRow}
     <label>People here (${ppl.length})</label>${list}<button class="wide" data-s="leave">End session</button>`;
   else {
     const host = ppl.find(p => p.host);
     h = `<h3><i class="live-dot"></i>Connected</h3><p>You're editing ${host ? esc(host.name) + "'s" : 'a shared'} board live. If you leave, you keep a copy on this device.</p>
+    ${nameRow}
     <label>People here (${ppl.length})</label>${list}<button class="wide" data-s="leave">Leave session</button>`;
   }
-  const panel = $('#sharepanel'), focused = document.activeElement && panel.contains(document.activeElement) ? document.activeElement.id : null;
+  const panel = $('#sharepanel'), fe = document.activeElement && panel.contains(document.activeElement) ? document.activeElement : null;
+  const focused = fe && fe.id, typed = fe && fe.tagName === 'INPUT' ? fe.value : null;
   panel.innerHTML = h;
-  if (focused && $('#' + focused)) $('#' + focused).focus();
+  const back = focused && $('#' + focused);
+  if (back) { if (typed !== null && !back.readOnly) back.value = typed; back.focus(); }
 }
 $('#sharebtn').addEventListener('click', () => { renderShare(); showShare(!$('#sharepanel').classList.contains('show')); });
 document.addEventListener('pointerdown', e => { if (!e.target.closest('#sharepanel,#sharebtn')) showShare(false); });
@@ -1693,7 +1755,7 @@ if (hashJoin) {
   collab.prefill = hashJoin[1].toLowerCase();
   history.replaceState(null, '', location.pathname + location.search);
   renderShare(); showShare(true);
-  if (myName()) joinSession(collab.prefill); else $('#myname').focus();
+  joinSession(collab.prefill); // name is remembered (or picked automatically), so join right away
 } else refocus();
 })();
 </script>
