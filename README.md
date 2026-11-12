@@ -1,6 +1,6 @@
 # Idea Board
 
-An infinite-canvas whiteboard for macOS and the web, in the spirit of Miro: sticky notes, shapes,
+An infinite-canvas whiteboard for macOS, Windows and the web, in the spirit of Miro: sticky notes, shapes,
 text, connectors, freehand pen, frames, images and templates, with **live collaboration**.
 
 ![Idea Board with a product-launch board: sticky notes in a Brainstorm frame and a flowchart in a Launch flow frame](docs/screenshots/board.png)
@@ -11,6 +11,10 @@ text, connectors, freehand pen, frames, images and templates, with **live collab
   unzip it and drag **Idea Board** into Applications. Needs macOS 13 or later (Apple silicon and Intel).
   The app isn't notarised by Apple, so the first time, right-click it and choose **Open**
   (or go to System Settings → Privacy & Security → **Open Anyway**).
+- **Windows app:** download **Idea-Board-Windows.zip** from the [latest release](https://github.com/lemonspitz/IdeaBoard/releases/latest),
+  unzip it anywhere (for example into Documents) and run **Idea Board.exe**. Needs Windows 10 or 11 (64-bit);
+  nothing else to install. Windows may show "Windows protected your PC" the first time because the app
+  isn't signed: click **More info → Run anyway**.
 - **Browser (any computer or phone):** https://lemonspitz.github.io/IdeaBoard/ — nothing to install.
 
 You create a free account the first time (name, email, password) and confirm your email address.
@@ -73,8 +77,13 @@ Double-click empty space for a sticky note. Pasting several lines of text makes 
     ./build.sh --install  # also copy to /Applications
 
 The whiteboard engine is one file, `Resources/web/index.html` (also published from `docs/` to
-GitHub Pages). `Sources/main.swift` wraps it in a native window with menus, open/save panels,
-PNG export, join links and autosave to `~/Library/Application Support/Idea Board`.
+GitHub Pages). On the Mac, `Sources/main.swift` wraps it in a native window with menus, open/save
+panels, PNG export, join links and autosave to `~/Library/Application Support/Idea Board`.
+
+On Windows, `windows/` (C#, .NET Framework 4.8 + WebView2) hosts the same page with open/save
+dialogs, PNG export, autosave to `%APPDATA%\Idea Board`, `.ideaboard` file icons and `ideaboard://`
+links. GitHub Actions builds it and runs `--selftest` on a real Windows machine
+(`.github/workflows/build-windows.yml`); download the result from the run's artifacts.
 
 Checks: `--selftest` (template + PNG export), `--selftest-join CODE` (joins a live session),
 `--shot board.ideaboard out.png [--host]` (the README screenshots; demo board in `tools/`).
