@@ -4,8 +4,8 @@ set -euo pipefail
 cd "${0:A:h}"
 
 APP="build/Idea Board.app"
-VERSION="1.2"
-BUILD="3"
+VERSION="1.0"
+BUILD="4"
 
 rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources/web"

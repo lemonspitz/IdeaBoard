@@ -4,16 +4,29 @@ import UniformTypeIdentifiers
 
 let fileExt = "ideaboard"
 
+// Hidden screenshot mode (for the README): --shot board.ideaboard out.png [--host]
+// Uses its own settings domain so it never touches the real app's name, device ID or open file.
+let shotArgs: (board: String, out: String)? = {
+    let a = CommandLine.arguments
+    guard let i = a.firstIndex(of: "--shot"), i + 2 < a.count else { return nil }
+    return (a[i + 1], a[i + 2])
+}()
+let appDefaults: UserDefaults = {
+    guard shotArgs != nil, let d = UserDefaults(suiteName: "com.lemonspitz.ideaboard.shots") else { return .standard }
+    d.set("Alex", forKey: "displayName")
+    return d
+}()
+
 final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate,
                          WKScriptMessageHandler, WKNavigationDelegate, WKUIDelegate {
     var window: NSWindow!
     var web: WKWebView!
     var ready = false
     var pendingOpen: URL?
-    var dirty = false { didSet { window?.isDocumentEdited = dirty; UserDefaults.standard.set(dirty, forKey: "dirty") } }
+    var dirty = false { didSet { window?.isDocumentEdited = dirty; appDefaults.set(dirty, forKey: "dirty") } }
     var fileURL: URL? {
         didSet {
-            UserDefaults.standard.set(fileURL?.path, forKey: "lastFile")
+            appDefaults.set(fileURL?.path, forKey: "lastFile")
             updateTitle()
         }
     }
@@ -38,7 +51,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate,
         var boot = "window.__IDEABOARD_NATIVE=true;"
         // Remembered collaboration identity: a random per-install device ID (never a hardware ID)
         // and a display name that defaults to the Mac account's first name.
-        let ud = UserDefaults.standard
+        let ud = appDefaults
         var device = ud.string(forKey: "deviceID") ?? ""
         if device.isEmpty { device = UUID().uuidString.lowercased(); ud.set(device, forKey: "deviceID") }
         let first = NSFullUserName().split(separator: " ").first.map(String.init) ?? ""
@@ -49,8 +62,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate,
         }
         if let s = try? String(contentsOf: autosaveURL, encoding: .utf8) {
             boot += "window.__IDEABOARD_INITIAL=\(jsString(s));"
-            if UserDefaults.standard.bool(forKey: "dirty") { boot += "window.__IDEABOARD_DIRTY=true;" }
-            if let p = UserDefaults.standard.string(forKey: "lastFile"), FileManager.default.fileExists(atPath: p) {
+            if appDefaults.bool(forKey: "dirty") { boot += "window.__IDEABOARD_DIRTY=true;" }
+            if let p = appDefaults.string(forKey: "lastFile"), FileManager.default.fileExists(atPath: p) {
                 fileURL = URL(fileURLWithPath: p)
             }
         }
@@ -58,6 +71,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate,
 
         let cfg = WKWebViewConfiguration()
         cfg.userContentController = uc
+        // A live session must keep running when the window is in the background or minimised;
+        // by default WebKit throttles/suspends inactive pages, which stalls peer connections.
+        if #available(macOS 14.0, *) { cfg.preferences.inactiveSchedulingPolicy = .none }
         web = WKWebView(frame: .zero, configuration: cfg)
         web.navigationDelegate = self
         web.uiDelegate = self
@@ -74,6 +90,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate,
         window.tabbingMode = .disallowed
         window.center()
         window.setFrameAutosaveName("IdeaBoardMain")
+        if shotArgs != nil { window.setContentSize(NSSize(width: 1440, height: 900)); window.center() }
         updateTitle()
         window.makeKeyAndOrderFront(nil)
 
@@ -107,12 +124,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate,
     }
 
     var pendingJoin: String?
+    var liveActivity: NSObjectProtocol?
     var sessionRole = ""
 
     func webView(_ w: WKWebView, didFinish nav: WKNavigation!) {
         ready = true
         if let u = pendingOpen { pendingOpen = nil; openURL(u) }
         if let c = pendingJoin { pendingJoin = nil; join(c) }
+        if let shot = shotArgs { runShot(board: shot.board, out: shot.out) }
     }
 
     /// Joining a live board replaces the open board, like Open… does.
@@ -160,8 +179,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate,
         case "session":
             sessionRole = body["value"] as? String ?? ""
             updateTitle()
+            // Keep App Nap away while hosting or joining a live session.
+            if sessionRole.isEmpty {
+                if let a = liveActivity { ProcessInfo.processInfo.endActivity(a); liveActivity = nil }
+            } else if liveActivity == nil {
+                liveActivity = ProcessInfo.processInfo.beginActivity(options: [.userInitiated], reason: "Live collaboration session")
+            }
         case "identity":
-            if let n = body["name"] as? String, !n.isEmpty { UserDefaults.standard.set(n, forKey: "displayName") }
+            if let n = body["name"] as? String, !n.isEmpty { appDefaults.set(n, forKey: "displayName") }
         case "copy":
             if let v = body["value"] as? String {
                 NSPasteboard.general.clearContents()
@@ -383,6 +408,37 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate,
     }
 
     // MARK: self test
+
+    func runShot(board: String, out: String) {
+        let env = ProcessInfo.processInfo.environment
+        let host = CommandLine.arguments.contains("--host")
+        openURL(URL(fileURLWithPath: board))
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
+            self.js("app.fit(); 1")
+            if host { self.js("document.querySelector('#sharebtn').click(); document.querySelector('[data-s=host]').click(); 1") }
+        }
+        if host {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 7) {
+                self.js("app._state().code") { r in print("SHOTCODE \(r ?? "nil")"); fflush(stdout) }
+            }
+        }
+        let wait = Double(env["IDEABOARD_SHOT_WAIT"] ?? "") ?? 4
+        DispatchQueue.main.asyncAfter(deadline: .now() + wait) {
+            self.js(env["IDEABOARD_SHOT_JS"] ?? "1") { r in
+                print("SHOTJS \(r ?? "nil")"); fflush(stdout)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                    self.web.takeSnapshot(with: nil) { img, _ in
+                        if let img = img, let t = img.tiffRepresentation, let rep = NSBitmapImageRep(data: t),
+                           let png = rep.representation(using: .png, properties: [:]) {
+                            try? png.write(to: URL(fileURLWithPath: out))
+                            print("SHOT saved \(out) \(rep.pixelsWide)x\(rep.pixelsHigh)"); fflush(stdout)
+                        }
+                        self.js("app.leaveSession(); 1") { _ in NSApp.terminate(nil) }
+                    }
+                }
+            }
+        }
+    }
 
     func joinTest(_ code: String) {
         print("JOINTEST start")

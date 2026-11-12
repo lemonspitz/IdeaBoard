@@ -394,7 +394,12 @@ function fitText(it, el) {
   txt.style.fontSize = fs + 'px';
   const cs = getComputedStyle(cell);
   const avail = cell.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
-  while (fs > 6 && (txt.scrollHeight > avail + 1 || txt.scrollWidth > txt.clientWidth + 1)) { fs -= fs > 20 ? 2 : 1; txt.style.fontSize = fs + 'px'; }
+  // Measure with normal word wrapping so a long word makes the text shrink instead of being split
+  // mid-word; only if it still can't fit at the smallest size do we allow breaking inside words.
+  txt.style.overflowWrap = 'normal';
+  while (fs > 8 && (txt.scrollHeight > avail + 1 || txt.scrollWidth > txt.clientWidth + 1)) { fs -= fs > 20 ? 2 : 1; txt.style.fontSize = fs + 'px'; }
+  txt.style.overflowWrap = '';
+  while (fs > 6 && txt.scrollHeight > avail + 1) { fs -= 1; txt.style.fontSize = fs + 'px'; }
   it._fs = fs;
 }
 function updateEl(it, el) {
@@ -1518,6 +1523,12 @@ document.addEventListener('mouseleave', () => { if (collab.on) sendAll({ t: 'cur
 function peopleList() { return [...collab.people.entries()].map(([id, p]) => ({ id, name: p.name, color: p.color, host: !!p.host })); }
 function broadcastPeople() { sendAll({ t: 'peers', people: peopleList() }); renderShare(); drawCursors(); }
 
+// Small connection log (window.__ideaboardLog) for diagnosing peer-to-peer problems.
+const connLog = window.__ideaboardLog = [];
+function clog(m) { connLog.push(new Date().toISOString().slice(11, 19) + ' ' + m); if (connLog.length > 80) connLog.shift(); }
+addEventListener('error', e => clog('js error ' + e.message));
+addEventListener('unhandledrejection', e => clog('rejection ' + (e.reason && (e.reason.message || e.reason))));
+
 async function startHosting(retry) {
   if (collab.on || (collab.connecting && !retry)) return;
   const name = ($('#myname') && $('#myname').value.trim()) || myName() || 'Host';
@@ -1535,13 +1546,19 @@ async function startHosting(retry) {
     toast('Live session started. Send the link to invite people.');
     post({ cmd: 'session', value: 'host' });
   });
+  try { peer.socket.on('message', m => clog('broker ' + (m && m.type))); } catch (e) {}
   peer.on('connection', conn => {
+    clog('incoming ' + conn.peer.slice(0, 8));
+    conn.on('open', () => clog('conn open ' + conn.peer.slice(0, 8)));
     conn.on('data', d => hostReceive(conn, d));
-    conn.on('close', () => dropPeer(conn.peer));
-    conn.on('error', () => dropPeer(conn.peer));
+    conn.on('close', () => { clog('conn close'); dropPeer(conn.peer); });
+    conn.on('error', e => { clog('conn error ' + (e && e.type)); dropPeer(conn.peer); });
+    const pc = conn.peerConnection;
+    if (pc) pc.addEventListener('iceconnectionstatechange', () => clog('ice ' + pc.iceConnectionState));
   });
-  peer.on('disconnected', () => { if (collab.on && !peer.destroyed) setTimeout(() => { try { peer.reconnect(); } catch (e) {} }, 1500); });
+  peer.on('disconnected', () => { clog('broker disconnected'); if (collab.on && !peer.destroyed) setTimeout(() => { try { peer.reconnect(); } catch (e) {} }, 1500); });
   peer.on('error', err => {
+    clog('peer error ' + err.type);
     if (err.type === 'unavailable-id' && !collab.on) { peer.destroy(); startHosting(true); return; }
     if (collab.on && (err.type === 'network' || err.type === 'server-error' || err.type === 'socket-error')) return; // live links keep working
     toast('Could not start the session (' + err.type + ').');
