@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Idea Board for Windows: a WinForms window hosting the shared whiteboard page
+       (Resources/web/index.html) in Microsoft Edge WebView2. Targets .NET Framework 4.8,
+       which ships with Windows 10/11, so no runtime download is needed. -->
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net48</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <PlatformTarget>x64</PlatformTarget>
+    <AssemblyName>Idea Board</AssemblyName>
+    <RootNamespace>IdeaBoard</RootNamespace>
+    <ApplicationIcon>AppIcon.ico</ApplicationIcon>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <Version>1.1.0</Version>
+    <Product>Idea Board</Product>
+    <Company>lemonspitz</Company>
+    <Copyright>© 2026 @lemonspitz · github.com/lemonspitz</Copyright>
+    <Description>Idea Board — whiteboard with live collaboration</Description>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.2792.45" />
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Web.Extensions" />
+    <Reference Include="Microsoft.CSharp" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="..\Resources\web\index.html" Link="web\index.html" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

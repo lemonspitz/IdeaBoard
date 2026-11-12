@@ -4,3 +4,5 @@ dist/
 firebase/emulator-test-accounts.txt
 firebase/*.log
 firebase/.firebase/
+windows/bin/
+windows/obj/

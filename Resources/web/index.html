@@ -251,6 +251,10 @@ const $ = s => document.querySelector(s);
 const SVGNS = 'http://www.w3.org/2000/svg';
 const stage = $('#stage'), world = $('#world'), overlay = $('#overlay'), ctxBar = $('#ctx'), clip = $('#clip');
 const NATIVE = !!(window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.board);
+const WIN_APP = NATIVE && window.__IDEABOARD_PLATFORM === 'win';   // Windows app (WebView2 shell, no menu bar)
+const IS_MAC = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
+// Shortcut labels: ⌘/⇧ on Apple devices, Ctrl+/Shift+ elsewhere.
+const kbd = t => IS_MAC ? t : String(t).replace(/⇧⌘/g, 'Ctrl+Shift+').replace(/⌘/g, 'Ctrl+').replace(/⇧/g, 'Shift+').replace(/⌫/g, 'Del');
 const post = msg => { if (NATIVE) window.webkit.messageHandlers.board.postMessage(msg); };
 
 const STICKY = ['#fff59d','#ffd180','#ffab91','#f8bbd0','#e1bee7','#b3e5fc','#b2dfdb','#c5e1a5','#eeeeee'];
@@ -605,7 +609,7 @@ function updateCtx(list) {
     if (c) h += `<div class="sep"></div><button data-act="arrow" title="Arrowhead">${icon(c.arrow ? 'arrow' : 'noarrow')}</button><button data-act="curve" title="Curved / straight">${icon(c.curve ? 'curve' : 'straight')}</button><button data-act="dash" class="${c.dash ? 'on' : ''}" title="Dashed">┄</button>`;
     const lw = first(i => i.type === 'connector' || i.type === 'pen');
     if (lw) h += `<button data-act="width" title="Line width">${lw.width || 2}px</button>`;
-    h += `<div class="sep"></div><button data-act="front" title="Bring to front (])">${icon('front')}</button><button data-act="back" title="Send to back ([)">${icon('back')}</button><button data-act="dup" title="Duplicate (⌘D)">${icon('dup')}</button><button data-act="del" title="Delete (⌫)">${icon('trash')}</button>`;
+    h += `<div class="sep"></div><button data-act="front" title="Bring to front (])">${icon('front')}</button><button data-act="back" title="Send to back ([)">${icon('back')}</button><button data-act="dup" title="${kbd('Duplicate (⌘D)')}">${icon('dup')}</button><button data-act="del" title="${kbd('Delete (⌫)')}">${icon('trash')}</button>`;
     ctxBar.innerHTML = h;
   }
   let b = sbox(union(list.map(bbox)));
@@ -1127,6 +1131,12 @@ document.addEventListener('keydown', e => {
     if (k === 'c' || k === 'x' || k === 'v') { refocus(); return; }
     const map = { z: () => e.shiftKey ? redo() : undo(), y: redo, d: duplicateSel, a: selectAll, '=': zoomIn, '+': zoomIn, '-': zoomOut, '0': zoomReset, '1': () => fit() };
     if (!NATIVE) Object.assign(map, { s: () => saveFile(), o: () => $('#filein').click(), e: () => exportPNGFile() });
+    else if (WIN_APP) Object.assign(map, {   // the Windows app has no menu bar, so the page handles its shortcuts
+      n: () => post({ cmd: 'new' }), o: () => post({ cmd: 'open' }), s: () => post({ cmd: e.shiftKey ? 'saveAs' : 'save' }),
+      e: () => post({ cmd: 'export' }),
+      l: () => { if (e.shiftKey) { renderShare(); showShare(true); } },
+      b: () => { if (e.shiftKey && CLOUD && cloud.user) showBoards(); },
+    });
     if (map[k] && !e.altKey) { e.preventDefault(); map[k](); }
     return;
   }
@@ -2271,6 +2281,11 @@ let initial = window.__IDEABOARD_INITIAL || null;
 if (!initial && !NATIVE) try { initial = localStorage.getItem('ideaboard.autosave'); } catch (e) {}
 if (initial) { load(initial); if (window.__IDEABOARD_DIRTY) setDirty(true); } else render();
 renderShare();
+if (!IS_MAC) {   // show Ctrl instead of ⌘ in tooltips, menus and the empty-board hint
+  document.querySelectorAll('[title]').forEach(el => { el.title = kbd(el.title); });
+  document.querySelectorAll('#menu .k').forEach(el => { el.textContent = kbd(el.textContent); });
+  $('#hint').innerHTML = $('#hint').innerHTML.replace('⌘-scroll', 'Ctrl-scroll');
+}
 const hashBoard = location.hash.match(/board=([-\w]{6,40})/);
 if (hashBoard) { cloud.pendingBoard = hashBoard[1]; history.replaceState(null, '', location.pathname + location.search); }
 const hashJoin = location.hash.match(/join=([a-z0-9]{6,16})/i);

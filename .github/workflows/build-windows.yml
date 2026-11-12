@@ -1,0 +1,44 @@
+name: Windows build
+
+on:
+  push:
+    branches: [main, 'build-*']
+    paths: ['windows/**', 'Resources/web/**', '.github/workflows/build-windows.yml']
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build
+        run: dotnet publish windows/IdeaBoard.csproj -c Release -o "out/Idea Board"
+
+      - name: Self-test on a real Windows machine
+        shell: pwsh
+        run: |
+          $env:IDEABOARD_SUPPORT = "$env:RUNNER_TEMP\ib-support"
+          $env:IDEABOARD_WEBDATA = "$env:RUNNER_TEMP\ib-webdata"
+          $exe = Resolve-Path "out/Idea Board/Idea Board.exe"
+          $p = Start-Process -FilePath $exe -ArgumentList '--selftest', "$env:RUNNER_TEMP\selftest.json", "$env:RUNNER_TEMP\selftest.png" -PassThru
+          if (-not $p.WaitForExit(180000)) { $p.Kill(); throw "self-test timed out" }
+          Copy-Item "$env:RUNNER_TEMP\selftest.*" .
+          Get-Content selftest.json
+          if ($p.ExitCode -ne 0) { throw "self-test failed (exit $($p.ExitCode))" }
+
+      - name: Zip
+        shell: pwsh
+        run: |
+          Remove-Item "out/Idea Board/*.pdb" -ErrorAction SilentlyContinue
+          Remove-Item "out/Idea Board/Microsoft.Web.WebView2.Wpf.dll" -ErrorAction SilentlyContinue
+          Compress-Archive -Path "out/Idea Board" -DestinationPath Idea-Board-Windows.zip
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Idea-Board-Windows
+          path: |
+            Idea-Board-Windows.zip
+            selftest.json
+            selftest.png
+        if: always()
